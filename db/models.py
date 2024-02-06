@@ -17,6 +17,10 @@ from sqlalchemy.orm import declarative_base, relationship
 Base = declarative_base()
 
 
+class ChallengeType(enum.Enum):
+    coin_flip = 1
+
+
 class RaffleType(enum.Enum):
     normal = 1
     anyone = 2
@@ -171,6 +175,25 @@ class AllowRedemption(Base):
 
     def __repr__(self):
         return f"AllowRedemption(id={self.id!r}, allowed={self.allowed!r})"
+
+
+class Challenge(Base):
+    __tablename__ = "challenges"
+    # TODO: does this need guild_id?
+    user_id = Column(BigInteger, primary_key=True)
+    opponent_id = Column(BigInteger, nullable=False)
+    channel_points = Column(Integer, nullable=False, default=0)
+    challenge_type = Column(Enum(ChallengeType), default=ChallengeType.coin_flip)
+    timestamp = Column(DateTime, default=func.now())
+    accepted = Column(Boolean, nullable=False, default=False)
+    ended = Column(Boolean, nullable=False, default=False)
+
+    def __repr__(self):
+        return (
+            f"Challenge(user_id={self.user_id!r}, opponent_id={self.opponent_id!r}"
+            f" channel_points={self.channel_points!r}, accepted={self.accepted!r}"
+            f" ended={self.ended!r})"
+        )
 
 
 class Prediction(Base):

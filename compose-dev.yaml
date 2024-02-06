@@ -33,7 +33,7 @@ services:
     environment:
       MYSQL_DATABASE: woohoojin
       MYSQL_USER: woohoojinuser
-      MYSQL_PASSWORD: testpassword
+      MYSQL_ROOT_PASSWORD: testpassword
       MYSQL_ROOT_HOST: '%'
     expose:
       - '3306'

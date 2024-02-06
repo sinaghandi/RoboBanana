@@ -1,11 +1,16 @@
-from discord import app_commands, Interaction, Client
+from discord import app_commands, User, Interaction, Client
 from discord.app_commands import Choice
+import random
+from controllers.challenge_controller import ChallengeController
 from controllers.good_morning_controller import GoodMorningController
 from controllers.predictions.prediction_entry_controller import (
     PredictionEntryController,
 )
 from db import DB
-from db.models import PredictionChoice
+from db.models import (
+    PredictionChoice,
+    ChallengeType,
+)
 from views.rewards.redeem_reward_view import RedeemRewardView
 from threading import Thread
 import requests
@@ -26,6 +31,33 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    # TODO: change choices to be variable, not hardcoded
+    # potentially, refactor together with connect four
+
+    @app_commands.command(name="challenge")
+    @app_commands.choices(
+        challenge_options=[
+            Choice(name="coin flip", value=1),
+        ]
+    )
+    @app_commands.describe(opponent="Who you'd like to face")
+    @app_commands.describe(bet="How many hoojbucks you want to gamble")
+    async def challenge_user(
+        self, interaction: Interaction, challenge_type: ChallengeType, opponent: User, bet: int,
+        ):
+        # TODO: make challenge controller, DB
+        success = await ChallengeController.create_challenge(
+            challenge_type, opponent, bet, interaction, self.client
+        )
+
+        if not success:
+            return
+        
+        await interaction.response.send_message(
+            f"{interaction.user.mention} has challenged {opponent.mention} to a {challenge_type} with {bet} hoojbucks on the line!"
+            # TODO: How wrap?
+        )
 
     @app_commands.command(name="redeem")
     async def redeem_reward(self, interaction: Interaction):
